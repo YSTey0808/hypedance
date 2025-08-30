@@ -18,7 +18,13 @@ source venv/bin/activate
 # 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Run the project
+# 4. Create .env file 
+OPENAI_API_KEY={API_KEY}
+LANGCHAIN_API_KEY={API_KEY}
+LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
+LANGCHAIN_PROJECT=compliance-guardian-local
+
+# 5. Run the project
 python main.py
 ```
 
@@ -34,7 +40,13 @@ venv\Scripts\activate
 # 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Run the project
+# 4. Create .env file 
+OPENAI_API_KEY={API_KEY}
+LANGCHAIN_API_KEY={API_KEY}
+LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
+LANGCHAIN_PROJECT=compliance-guardian-local
+
+# 5. Run the project
 python main.py
 ```
 
