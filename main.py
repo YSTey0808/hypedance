@@ -27,20 +27,6 @@ os.environ["ANONYMIZED_TELEMETRY"] = "False"
 
 class ComplianceGuardian:
     def __init__(self, use_cache: bool = True):
-        self.legal_sources = [
-            "https://en.wikipedia.org/wiki/Digital_Services_Act",
-            "https://leginfo.legislature.ca.gov/faces/billTextClient.xhtml?bill_id=202320240SB976",
-            "https://www.flsenate.gov/Session/Bill/2024/3",
-            "https://en.wikipedia.org/wiki/Utah_Social_Media_Regulation_Act",
-            "https://www.law.cornell.edu/uscode/text/18/2258A",
-            "https://gdpr-info.eu/",
-            "https://www.privacy-regulation.eu/",
-            "https://oag.ca.gov/privacy/ccpa",
-            "https://digital-strategy.ec.europa.eu/en/policies/digital-services-act",
-            "https://digital-strategy.ec.europa.eu/en/policies/digital-markets-act",
-            "https://www.pdpc.gov.sg/Personal-Data-Protection-Act/Overview",
-            "https://www.ppc.go.jp/en/",
-        ]
 
         self.glossary = {
             "NR": "Not recommended",
@@ -97,23 +83,6 @@ class ComplianceGuardian:
         print(f"🕵️ Validation model decision: {decision}")
         return decision == "YES"
 
-    # def load_existing_knowledge_base(self):
-    #     """Load existing legal vectorstore from disk"""
-    #     print("📖 Loading existing legal knowledge base from cache...")
-    #     try:
-    #         self.vectorstore = Chroma(
-    #             persist_directory="./chroma_db",
-    #             embedding_function=OpenAIEmbeddings(),
-    #             collection_name="legal_knowledge_base"
-    #         )
-    #         self.retriever = self.vectorstore.as_retriever(
-    #             search_type="mmr", 
-    #             search_kwargs={"k": 5, "fetch_k": 10, "lambda_mult": 0.7}
-    #         )
-    #         print("✅ Legal knowledge base loaded from cache.")
-    #     except Exception as e:
-    #         print(f"❌ Failed to load from cache, rebuilding... Error: {e}")
-    #         self.setup_knowledge_base()
 
     def setup_knowledge_base(self):
         """Build legal knowledge base with structured, law-specific chunking and metadata."""
@@ -128,9 +97,9 @@ class ComplianceGuardian:
             "https://gdpr-info.eu/": {"law_type": "General Data Protection Regulation (GDPR)", "separators": ["Article ", "Section ", "\n\n"]},
             "https://www.privacy-regulation.eu/": {"law_type": "EU General Data Protection Regulation", "separators": ["Article ", "Section ", "\n\n"]},
             "https://oag.ca.gov/privacy/ccpa": {"law_type": "California Consumer Privacy Act (CCPA)", "separators": ["§", "\n\n", "\n"]},
-            "https://digital-strategy.ec.europa.eu/en/policies/digital-services-act": {"law_type": "EU Digital Services Act", "separators": ["Section 1", "Section 2", "\n\n"]},
-            "https://digital-strategy.ec.europa.eu/en/policies/digital-markets-act": {"law_type": "EU Digital Markets Act", "separators": ["Article ", "\n\n"]},
-            "https://www.pdpc.gov.sg/Personal-Data-Protection-Act/Overview": {"law_type": "Singapore Personal Data Protection Act", "separators": ["Part ", "\n\n"]},
+            "https://commission.europa.eu/strategy-and-policy/priorities-2019-2024/europe-fit-digital-age/digital-services-act_en": {"law_type": "EU Digital Services Act", "separators": ["Section 1", "Section 2", "\n\n"]},
+            "https://en.wikipedia.org/wiki/Digital_Markets_Act": {"law_type": "EU Digital Markets Act", "separators": ["Article ", "\n\n"]},
+            "https://www.aseanbriefing.com/news/understanding-personal-data-protection-in-singapore/": {"law_type": "Singapore Personal Data Protection Act", "separators": ["Part ", "\n\n"]},
             "https://www.ppc.go.jp/en/": {"law_type": "Japanese Act on the Protection of Personal Information", "separators": ["Chapter ", "Article ", "\n\n"]},
         }
 
