@@ -318,7 +318,12 @@ Feature Title: {title}
 Feature Description: {description}
 Only return valid JSON.
 """
-        resp = self.llm.call_as_llm(prompt) if hasattr(self.llm, "call_as_llm") else self.llm.generate([{"role":"user","content":prompt}])
+        try:
+            resp = self.llm.invoke(prompt)
+        except (AttributeError, NotImplementedError):
+            # Fallback to generate if invoke is not available
+            resp = self.llm.generate([{"role": "user", "content": prompt}])
+
         # adapt depending on your ChatOpenAI return format
         text = resp[0].text if isinstance(resp, list) else getattr(resp, "content", None) or str(resp)
         # best-effort parse
@@ -570,7 +575,7 @@ Now analyze the provided feature artifact:"""
          # Retrieve feedback vector stores
         query_text_feedback = f"Feature: {title}. Description: {description}"
         try:
-            relevant_feedback_docs = self.feedback_retriever.get_relevant_documents(query_text_feedback)
+            relevant_feedback_docs = self.feedback_retriever.invoke(query_text_feedback)
             feedback_context = self.format_docs(relevant_feedback_docs) if relevant_feedback_docs else "No relevant feedback found."
         except Exception as e:
             print(f"⚠️ Error retrieving feedback: {e}")
@@ -700,7 +705,9 @@ def run_interactive_analysis():
     
     # Initialize the system
     analyzer = ComplianceGuardian(use_cache=True)
-    analyzer.clear_feedback()
+
+    #Uncomment to clear feedback
+    # analyzer.clear_feedback()
     while True:
         try:
             # Get feature title
