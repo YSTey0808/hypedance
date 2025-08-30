@@ -453,33 +453,29 @@ Response:
 
         output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
 
-        template = """You are a senior compliance analyst at TikTok. Your task is to analyze feature artifacts to determine if they require GEO-SPECIFIC COMPLIANCE LOGIC.
+        template = """You are a senior compliance analyst at TikTok. Your task is to determine if a feature implements GEO-SPECIFIC COMPLIANCE LOGIC (changes behavior for legal reasons in a specific region) vs BUSINESS LOGIC (changes for non-legal reasons) or if it is UNCLEAR (cannot determine from the artifact alone).
 
 **CRITICAL DISTINCTION:**
 - ✅ GEO-SPECIFIC COMPLIANCE LOGIC: The feature implements different behavior in specific regions to comply with LOCAL LAWS OR REGULATIONS.
-- ❌ BUSINESS LOGIC: The feature has different behavior for business reasons (market testing, phased rollouts, etc.).
-- ❓ UNCLEAR: The feature description doesn't specify the intention for geo-specific logic, requiring human evaluation.
+- ❌ BUSINESS LOGIC: The feature may or may not has different behavior for business reasons (market testing, phased rollouts, etc.).
+- ❓ UNCLEAR: The feature description doesn't specify the intention for geo-specific logic, or doesn't specify specific regions but it does requires specific regions legal compliance logic, requiring human evaluation.
 
 **CONTEXT FROM LEGAL KNOWLEDGE BASE:**
 {context}
 
-**FEEDBACK FROM USER (PRIORITIZE THIS IF RELEVANT):**
+**FEEDBACK FROM USER:**
 {feedback_context}
 
 **INTERNAL GLOSSARY:**
 {glossary}
 
-**FEATURE ARTIFACT TO ANALYZE:**
-Title: {title}
-Description: {description}
-
 **ANALYSIS GUIDELINES:**
 1. Focus on identifying mentions of specific countries, regions, or laws
 2. Determine if the regional logic is driven by legal requirements vs business decisions
-3. If intention is unclear, flag as UNCLEAR and specify what information is missing
+3. If intention is unclear or (region is missing AND but legal compliance is likely required), flag as UNCLEAR and specify what information is missing, and why requires human intervention
 4. Reference specific regulations and articles/sections when possible
 5. Assess risk level based on potential regulatory impact
-6. PRIORITIZE FEEDBACK CONTEXT over other contexts if it exists and is relevant
+6. Prioritize feedback context over all others, if it exists
 
 **OUTPUT FORMAT:**
 {format_instructions}
@@ -507,7 +503,32 @@ Output: {{
   "audit_trail": "Business requirement documents showing market testing purpose"
 }}
 
-Now analyze the provided feature artifact:"""
+Example 3:
+Input: "A video filter feature is available globally except KR"
+Output: {{
+  "flag": "UNCLEAR",
+  "reasoning": "The feature description doesn't specify why it's excluded in KR. It could be for business reasons (market testing) or legal compliance (Korean regulations).",
+  "related_regulations": [],
+  "risk_level": "MEDIUM",
+  "recommended_actions": "Contact product team to clarify the reason for KR exclusion",
+  "audit_trail": "Feature description lacks clarity on intention for geo-exclusion"
+}}
+
+Example 4
+Input: "“Reaction GIFs with embedded filtering. Enable GIFs in comments, while filtering content deemed inappropriate for minor accounts. Softblock will apply if a flagged GIF is used by ASL-flagged profiles.”"
+Output: {{
+  "flag": "UNCLEAR",
+  "reasoning": "The feature enforces stricter content filtering for minors and ASL-flagged profiles, which relates to child safety. However, the description does not specify whether this is tied to specific legal requirements in certain jurisdictions or is a global policy decision.",
+  "related_regulations": ["EU Digital Services Act", "California 'Protecting Our Kids from Social Media Addiction Act'", "Florida Online Protections for Minors Act"],
+  "risk_level": "HIGH",
+  "recommended_actions": "Cross-check whether filtering thresholds align with EU DSA requirements and US state laws, Confirm if “stricter moderation for minors” is global policy or region-specific logic",
+  "audit_trail": "Feature description doesn't specify regions, also no jurisdiction is specified for clarifications."
+}}
+
+Now analyze the provided feature artifact:
+**FEATURE ARTIFACT TO ANALYZE:**
+Title: {title}
+Description: {description}"""
 
         return template, output_parser
 
